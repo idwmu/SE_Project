@@ -4,8 +4,6 @@
 
 **Version:** 1.0
 
-**Authors:** Nakul Jayan (Student Team)
-
 **Date:** 08-09-2026
 
 **Status:** Draft v1.0
@@ -15,13 +13,6 @@ Revision history
 | **Version** | **Date**   | **Author** | **Change summary**                                         | **Approval** |
 |-------------|------------|------------|------------------------------------------------------------|--------------|
 | 1.0         | 08-09-2026 | Team       | Initial SRS drafted for Pocket Packet Sniffer mini project |              |
-
-Approvals
-
-| **Role**           | **Name** | **Signature / Email** | **Date** |
-|--------------------|----------|-----------------------|----------|
-| Course Coordinator |          |                       |          |
-| Project Guide      |          |                       |          |
 
 Table of Contents
 
