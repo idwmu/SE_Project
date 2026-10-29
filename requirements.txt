@@ -1,0 +1,3 @@
+# Runtime dependencies.
+# PR 01 (repository setup) needs none: pps.settings uses only the standard
+# library. Each later PR adds the packages it actually imports.

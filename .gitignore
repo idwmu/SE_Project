@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime data: captures, databases, certificates and keys must never be committed
+data/
+*.pcap
+*.pcapng
+*.db
+*.sqlite3
+*.pem
+*.key
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
