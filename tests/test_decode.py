@@ -5,11 +5,17 @@ from scapy.layers.inet import ICMP, IP, TCP, UDP
 from scapy.layers.inet6 import IPv6
 from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Raw
+from scapy.utils import PcapReader
 
 from pps.decode import decode
 
 
 def built(p):
+    if p.haslayer(Ether):
+        packet = p[Ether]
+        fields = packet.fields
+        packet.src = fields.get("src") or "02:00:00:00:00:01"
+        packet.dst = fields.get("dst") or "02:00:00:00:00:02"
     return Ether(bytes(p))
 
 
@@ -101,3 +107,20 @@ def test_non_http_tcp_payload_not_labelled():
         )
     )
     assert d.app_proto is None and d.protocol == "TCP"
+
+
+def test_labelled_demo_set_accuracy(demo_dir):
+    """TC-Dec-02: >= 95% of DNS/HTTP packets in the demo set are labelled correctly."""
+    expected = correct = 0
+    with PcapReader(str(demo_dir / "normal_traffic.pcap")) as rd:
+        for p in rd:
+            truth = None
+            if p.haslayer(UDP) and 53 in (p[UDP].sport, p[UDP].dport):
+                truth = "DNS"
+            elif p.haslayer(TCP) and len(p[TCP].payload) and 80 in (p[TCP].sport, p[TCP].dport):
+                truth = "HTTP"
+            if truth:
+                expected += 1
+                correct += decode(p).app_proto == truth
+    assert expected > 50
+    assert correct / expected >= 0.95
