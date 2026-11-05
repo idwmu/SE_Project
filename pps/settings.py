@@ -57,6 +57,12 @@ class Settings:
     port_scan_threshold: int = 20
     port_scan_window_s: int = 10
     storage_warn_percent: int = 80
+    # Service internals; fixed defaults, not read from the environment.
+    token_ttl_s: int = 3600
+    pairing_lockout_attempts: int = 5
+    pairing_lockout_s: int = 300
+    ws_batch_ms: int = 250
+    ws_max_packets_per_batch: int = 200
 
     def __post_init__(self) -> None:
         if self.capture_duration_s is not None and self.capture_duration_s <= 0:
@@ -71,6 +77,22 @@ class Settings:
             raise SettingsError("port_scan_window_s must be positive")
         if not 1 <= self.storage_warn_percent <= 99:
             raise SettingsError("storage_warn_percent must be between 1 and 99")
+
+    @property
+    def captures_dir(self) -> Path:
+        return self.data_dir / "captures"
+
+    @property
+    def replay_dir(self) -> Path:
+        return self.data_dir / "replay"
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_dir / "pps.db"
+
+    def ensure_dirs(self) -> None:
+        for d in (self.data_dir, self.captures_dir, self.replay_dir):
+            d.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> Settings:
@@ -104,3 +126,25 @@ class Settings:
         if raw is not None:
             values["data_dir"] = Path(raw.strip())
         return cls(**values)  # type: ignore[arg-type]
+
+
+def runtime_defaults(settings: Settings) -> dict:
+    """Defaults for the settings an admin can change at runtime (PPS-F-060).
+
+    They start from the validated environment settings; changes made in the
+    Settings page are stored in the database and override these.
+    """
+    return {
+        "default_interface": settings.interface or "",
+        "max_duration_s": settings.capture_duration_s or 0,  # 0 = no limit
+        "max_packets": settings.capture_packet_limit or 0,  # 0 = no limit
+        "portscan_threshold": settings.port_scan_threshold,
+        "portscan_window_s": settings.port_scan_window_s,
+        "arp_whitelist": [],  # entries "ip=mac" that may legitimately change
+        "max_storage_mb": 500,
+        # warn when less than this % of the quota or disk is left
+        "low_space_warn_pct": 100 - settings.storage_warn_percent,
+    }
+
+
+DEFAULT_CONFIG = runtime_defaults(Settings())
