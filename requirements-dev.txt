@@ -1,3 +1,5 @@
 -r requirements.txt
 pytest>=8,<10
-ruff>=0.6,<1
+# Exact pin: ruff changes rules between releases, so a range lets CI start
+# failing on unchanged code. Bump deliberately in its own PR.
+ruff==0.17.3
