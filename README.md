@@ -48,6 +48,19 @@ validates them at start-up.
 | `PPS_PORT_SCAN_WINDOW_S` | `10` | Port-scan detection window (seconds) |
 | `PPS_STORAGE_WARN_PERCENT` | `80` | Storage usage that triggers a warning |
 
+## Capture interfaces
+
+`pps.interfaces` lists and selects the interface to capture on (PPS-F-001):
+
+```bash
+python -m pps.interfaces      # list interfaces, the modes each supports, and permission status
+```
+
+- **Promiscuous mode** works on any interface, but on Wi-Fi only shows the network the adapter is associated with.
+- **Monitor mode** is wireless-only and delivers raw 802.11 frames. It needs driver support, and is detected on Linux via sysfs and `iw`. Where that can't be determined (no `iw`, non-Linux) monitor mode is reported as unavailable rather than guessed.
+- Capturing needs root or `CAP_NET_RAW` (plus `CAP_NET_ADMIN` to switch modes). The module returns the exact `setcap` command when a capability is missing.
+- `set_monitor_mode()` is Linux-only and uses `ip` and `iw`; a network manager (e.g. NetworkManager) may reclaim the adapter afterwards.
+
 ## Workflow
 
 Work lands through pull requests reviewed by the repository owner; see the
