@@ -89,3 +89,15 @@ def test_live_start_rejects_unknown_interface(tmp_path, demo_dir, monkeypatch):
         assert e.code == "BAD_INTERFACE"
     else:
         raise AssertionError("unknown interface accepted")
+
+
+def test_core_wires_modules(tmp_path):
+    from pps.core import Core
+    from pps.settings import Settings
+
+    core = Core(Settings(data_dir=tmp_path), pin="123456")
+    try:
+        assert core.auth.pin == "123456"
+        assert core.capture.state == "IDLE"
+    finally:
+        core.close()
