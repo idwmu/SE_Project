@@ -61,6 +61,19 @@ python -m pps.interfaces      # list interfaces, the modes each supports, and pe
 - Capturing needs root or `CAP_NET_RAW` (plus `CAP_NET_ADMIN` to switch modes). The module returns the exact `setcap` command when a capability is missing.
 - `set_monitor_mode()` is Linux-only and uses `ip` and `iw`; a network manager (e.g. NetworkManager) may reclaim the adapter afterwards.
 
+## Authentication and roles
+
+`pps.auth.AuthService` provides accounts, roles and tokens (PPS-SR-004, PPS-F-061):
+
+- **Roles:** `trainee` < `analyst` < `admin`. `require_role(principal, Role.X)` enforces a minimum; all user-management methods require `admin` themselves.
+- **Pairing:** a client exchanges the device PIN for a client token; login needs that token plus a username and password and returns a short-lived access token (`token_ttl_s`, default 1 hour).
+- **Passwords:** scrypt with a per-password salt; 8-128 characters. On first run `bootstrap_admin()` creates `admin` with a random password, shown once.
+- **Lockout:** after `pairing_lockout_attempts` failures (default 5) pairing is locked device-wide, and login is locked per username, for `pairing_lockout_s` seconds (default 300).
+- **Safeguards:** the last active administrator cannot be demoted or disabled; disabling a user or changing a password revokes their sessions; role changes apply to existing tokens immediately.
+- **Audit:** logins, pairing, lockouts and user changes are written to the audit log; passwords, PINs and tokens never are.
+
+Tokens and lockout state are held in memory, so restarting the service signs everyone out and clears lockouts.
+
 ## Workflow
 
 Work lands through pull requests reviewed by the repository owner; see the
