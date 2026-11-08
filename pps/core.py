@@ -15,14 +15,7 @@ class Core:
         self.settings = settings
         self.storage = Storage(settings.db_path, settings.captures_dir, runtime_defaults(settings))
         self.bus = EventBus()
-        self.auth = AuthService(
-            self.storage,
-            settings.data_dir / "secret.key",
-            settings.token_ttl_s,
-            settings.pairing_lockout_attempts,
-            settings.pairing_lockout_s,
-            pin=pin,
-        )
+        self.auth = AuthService(self.storage, settings, pin=pin)
         self.capture = CaptureManager(
             self.storage, self.bus, settings.replay_dir, self.storage.get_config
         )
