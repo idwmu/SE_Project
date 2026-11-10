@@ -3,7 +3,7 @@
 All addresses are private lab addresses (192.168.50.0/24) or documentation/public examples.
 No real network is touched: packets are built in memory and written to files.
 
-    python tools/make_demo_pcaps.py [output_dir]      (default: pps_data/replay)
+    python tools/make_demo_pcaps.py [output_dir]      (default: data/replay, read by python -m pps)
 """
 
 from __future__ import annotations
@@ -177,6 +177,6 @@ def build_all(out_dir: Path, seed: int = 7) -> dict[str, Path]:
 
 
 if __name__ == "__main__":
-    target = Path(sys.argv[1] if len(sys.argv) > 1 else "pps_data/replay")
+    target = Path(sys.argv[1] if len(sys.argv) > 1 else "data/replay")
     for path in build_all(target).values():
         print(f"wrote {path}")
