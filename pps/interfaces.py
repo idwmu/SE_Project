@@ -125,9 +125,21 @@ def _scapy_records() -> list[dict[str, Any]]:
         from scapy.config import conf
         from scapy.interfaces import get_if_list
 
+        # get_if_list() gives Npcap device paths on Windows but plain names elsewhere,
+        # so match each entry against both the friendly and the network name.
+        by_name: dict[str, Any] = {}
+        for dev in conf.ifaces.values():
+            for key in (getattr(dev, "name", None), getattr(dev, "network_name", None)):
+                if key:
+                    by_name[key] = dev
         records = []
-        for name in get_if_list():
-            dev = conf.ifaces.dev_from_name(name)
+        seen: set[int] = set()
+        for listed in get_if_list():
+            dev = by_name.get(listed)
+            if dev is None or id(dev) in seen:  # adapter Scapy cannot resolve: skip, don't fail
+                continue
+            seen.add(id(dev))
+            name = str(getattr(dev, "name", "") or listed)
             flags = _flag_names(getattr(dev, "flags", None))
             ips: list[str] = []
             for version in (4, 6):
