@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pocket Packet Sniffer</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Pairing (PPS-F-050 / SR-001) -->
+  <section id="pair-screen" class="gate hidden">
+    <form class="card stack" id="pair-form">
+      <h1>Pair this browser</h1>
+      <p class="muted small">Enter the 6-digit pairing PIN shown in the PPS server console.</p>
+      <input id="pair-pin" class="pin" type="text" inputmode="numeric" maxlength="6" autocomplete="off" required aria-label="Pairing PIN">
+      <input id="pair-name" type="text" placeholder="Device name (e.g. Nia's laptop)" aria-label="Device name">
+      <button class="btn primary" type="submit">Pair</button>
+      <div class="ferr" id="pair-err" role="alert"></div>
+    </form>
+  </section>
+
+  <!-- Login (PPS-SR-004) -->
+  <section id="login-screen" class="gate hidden">
+    <form class="card stack" id="login-form">
+      <h1>Sign in</h1>
+      <p class="muted small">Paired. Sign in with your PPS account.</p>
+      <input id="login-user" type="text" placeholder="Username" autocomplete="username" required aria-label="Username">
+      <input id="login-pass" type="password" placeholder="Password" autocomplete="current-password" required aria-label="Password">
+      <button class="btn primary" type="submit">Sign in</button>
+      <div class="ferr" id="login-err" role="alert"></div>
+      <button class="btn sm" type="button" id="unpair">Unpair this browser</button>
+    </form>
+  </section>
+
+  <!-- App shell -->
+  <div id="app" class="hidden">
+    <header class="topbar">
+      <div class="brand"><span class="dot" id="brand-dot"></span>Pocket Packet Sniffer</div>
+      <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+      <div class="whoami">
+        <span id="whoami"></span>
+        <button class="btn sm" id="theme" title="Toggle light/dark">&#9680;</button>
+        <button class="btn sm" id="logout">Sign out</button>
+      </div>
+    </header>
+    <main id="panels"></main>
+  </div>
+
+  <div id="toasts" aria-live="polite"></div>
+
+  <!-- core first, then one script per feature module -->
+  <script src="/static/js/core.js"></script>
+  <script src="/static/js/live.js"></script>
+  <script>PPS.boot();</script>
+</body>
+</html>
