@@ -17,6 +17,7 @@ from ..settings import Settings
 from . import (
     routes_auth,  # PPS-F-050, F-061, SR-001, SR-004
     routes_capture,  # PPS-F-001..003, F-030/031, F-051/052
+    routes_filters,  # PPS-F-020..023
 )
 from .deps import ApiError, auth_error_status
 
@@ -27,6 +28,7 @@ API = "/api/v1"
 ROUTERS = [
     routes_auth.router,
     routes_capture.router,
+    routes_filters.router,
 ]
 
 
