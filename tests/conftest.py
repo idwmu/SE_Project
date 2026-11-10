@@ -25,7 +25,6 @@ def demo_dir(tmp_path_factory):
 @pytest.fixture
 def app(tmp_path, demo_dir):
     from pps.api.app import create_app
-
     from pps.settings import Settings
 
     settings = Settings(data_dir=tmp_path / "data")

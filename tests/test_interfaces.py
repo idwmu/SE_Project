@@ -409,3 +409,23 @@ def test_info_is_immutable():
     with pytest.raises(AttributeError):
         info().name = "x"  # type: ignore[misc]
 
+
+def test_windows_npcap_names_are_resolved(monkeypatch):
+    """On Windows get_if_list() returns Npcap device paths, not friendly names."""
+    import types
+
+    import scapy.interfaces
+    from scapy.config import conf
+
+    wifi = types.SimpleNamespace(
+        name="Wi-Fi", network_name=r"\Device\NPF_{46A1}", description="Intel Wi-Fi 6",
+        flags=0, ips={4: ["192.168.1.20"]}, mac="aa:bb:cc:dd:ee:ff",
+    )
+    fake_ifaces = types.SimpleNamespace(values=lambda: [wifi])
+    monkeypatch.setattr(conf, "ifaces", fake_ifaces)
+    monkeypatch.setattr(
+        scapy.interfaces, "get_if_list", lambda: [r"\Device\NPF_{46A1}", r"\Device\NPF_{GONE}"]
+    )
+    records = interfaces._scapy_records()
+    assert [r["name"] for r in records] == ["Wi-Fi"]  # unknown adapter skipped, not fatal
+    assert records[0]["ips"] == ("192.168.1.20",)
