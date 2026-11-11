@@ -41,19 +41,26 @@ def main(argv: list[str] | None = None) -> int:
     if args.no_tls:
         overrides["tls_enabled"] = False
     settings = dataclasses.replace(settings, **overrides)
-    app = create_app(settings, pin=args.pin)
-    core = app.state.core
-    admin_pw = core.auth.bootstrap_admin()
 
+    # TLS comes first: bootstrap_admin() below shows the first-run password exactly once, so
+    # nothing that can still fail may run after it.
     ssl_kwargs: dict = {}
     scheme = "http"
     fp = None
     if settings.tls_enabled:
-        from .tlsutil import ensure_cert  # PPS-SR-002
+        from .tlsutil import TlsError, ensure_cert  # PPS-SR-002
 
-        cert, key, fp = ensure_cert(settings.data_dir / "tls")
+        try:
+            cert, key, fp = ensure_cert(settings.data_dir / "tls", extra_hosts=[settings.api_host])
+        except TlsError as exc:
+            print(f"TLS error: {exc}", file=sys.stderr)
+            return 2
         ssl_kwargs = {"ssl_certfile": str(cert), "ssl_keyfile": str(key)}
         scheme = "https"
+
+    app = create_app(settings, pin=args.pin)
+    core = app.state.core
+    admin_pw = core.auth.bootstrap_admin()
 
     shown_host = "localhost" if settings.api_host in ("127.0.0.1", "0.0.0.0") else settings.api_host
     bar = "=" * 62
@@ -63,6 +70,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f" Pairing PIN : {core.auth.pin}")
     if fp:
         print(f" TLS cert    : self-signed, SHA-256 {fp}")
+        print("               (local demo certificate: check this fingerprint in the browser)")
+    else:
+        print(" WARNING     : TLS is off; PINs, passwords and tokens cross the network in clear.")
+        print("               Use only on a network you trust.")
     if admin_pw:
         print(f" First run   : user 'admin', password '{admin_pw}' (shown once, change it)")
     print(f" Data folder : {settings.data_dir.resolve()}")

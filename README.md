@@ -74,6 +74,16 @@ python -m pps.interfaces      # list interfaces, the modes each supports, and pe
 
 Tokens and lockout state are held in memory, so restarting the service signs everyone out and clears lockouts.
 
+## HTTPS
+
+`python -m pps` serves the dashboard and API over HTTPS (PPS-SR-002) using `pps/tlsutil.py`. On first run it creates a **self-signed certificate for local demonstration** in `<data dir>/tls/` (`cert.pem`, `key.pem`; the key is mode 0600).
+
+- **Expect a browser warning once.** No authority vouches for a self-signed certificate. Compare the SHA-256 fingerprint printed in the start-up banner with the one the browser shows before choosing *Advanced → Proceed*, or import the certificate as trusted. This encrypts traffic, but does not prove the device's identity to someone who is not checking the fingerprint.
+- **The certificate follows the device.** It covers `localhost`, the loopback addresses, the host name (and `<host>.local`), the primary LAN address, the addresses of up Wi-Fi interfaces, and the `--host` you bind to. It is valid for one year and re-issued automatically when close to expiry or when those names change (the fingerprint then changes too).
+- **For anything beyond a demo, bring your own certificate.** Put one issued by a real or private CA in `<data dir>/tls/cert.pem` with its unencrypted key in `key.pem`. Files PPS did not generate are used as they are, never overwritten, and an expired or mismatched pair stops start-up with a clear message.
+- `--no-tls` (or `PPS_TLS_ENABLED=false`) serves plain HTTP for development only; PINs, passwords and tokens then cross the network unencrypted, and the banner says so.
+- The minimum TLS version comes from the platform's OpenSSL defaults; PPS does not set its own floor.
+
 ## Workflow
 
 Work lands through pull requests reviewed by the repository owner; see the
