@@ -16,6 +16,7 @@ from ..core import Core
 from ..settings import Settings
 from . import (
     routes_alerts,  # PPS-F-040..043
+    routes_audit,  # PPS-SR-005
     routes_auth,  # PPS-F-050, F-061, SR-001, SR-004
     routes_capture,  # PPS-F-001..003, F-030/031, F-051/052
     routes_config,  # PPS-F-060
@@ -33,6 +34,7 @@ ROUTERS = [
     routes_filters.router,
     routes_alerts.router,
     routes_config.router,
+    routes_audit.router,
 ]
 
 
