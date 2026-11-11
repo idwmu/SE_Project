@@ -15,6 +15,7 @@ from ..capture import CaptureError
 from ..core import Core
 from ..settings import Settings
 from . import (
+    routes_health,  # PPS-F-062
     routes_alerts,  # PPS-F-040..043
     routes_audit,  # PPS-SR-005
     routes_auth,  # PPS-F-050, F-061, SR-001, SR-004
@@ -35,6 +36,7 @@ ROUTERS = [
     routes_alerts.router,
     routes_config.router,
     routes_audit.router,
+    routes_health.router,
 ]
 
 
