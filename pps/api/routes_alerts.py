@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from ..core import Core
 from .deps import ApiError, get_core, require
@@ -15,12 +15,12 @@ def list_alerts(
     since: float | None = None,
     type: str | None = None,
     session_id: str | None = None,
-    limit: int = 200,
+    limit: int = Query(200, ge=1, le=1000),
     _: dict = Depends(require("trainee")),
     core: Core = Depends(get_core),
 ) -> list:
     return core.storage.list_alerts(
-        since=since, type_=type, session_id=session_id, limit=min(limit, 1000)
+        since=since, type_=type, session_id=session_id, limit=limit
     )
 
 

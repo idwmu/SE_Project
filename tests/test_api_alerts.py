@@ -26,3 +26,10 @@ def test_alerts_listed_filtered_and_acked(client, role_headers):
 
 def test_alerts_require_auth(client):
     assert client.get(f"{API}/alerts").status_code == 401
+
+
+def test_alerts_limit_validated(client, role_headers):
+    a = role_headers["analyst"]
+    for bad in (-1, 0, 1001):  # a negative LIMIT would make SQLite return every row
+        assert client.get(f"{API}/alerts", params={"limit": bad}, headers=a).status_code == 422, bad
+    assert client.get(f"{API}/alerts", params={"limit": 1}, headers=a).status_code == 200
