@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ipaddress
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -20,6 +22,23 @@ INT_KEYS = {
     "max_storage_mb": (10, 1_000_000),
     "low_space_warn_pct": (1, 90),
 }
+
+_MAC_RE = re.compile(r"^[0-9a-f]{2}([:-])[0-9a-f]{2}(\1[0-9a-f]{2}){4}$")
+
+
+def _arp_entry(entry: Any) -> str:
+    """Validate one "ip=mac" whitelist entry; return it as the ARP detector compares it."""
+    ip, sep, mac = entry.partition("=") if isinstance(entry, str) else ("", "", "")
+    ip, mac = ip.strip(), mac.strip().lower()
+    try:
+        ip = str(ipaddress.IPv4Address(ip))
+    except ValueError:
+        ip = ""
+    if not sep or not ip or not _MAC_RE.match(mac):
+        raise ApiError(
+            400, "BAD_VALUE", f"Invalid ARP whitelist entry {entry!r}: use ipv4=aa:bb:cc:dd:ee:ff."
+        )
+    return f"{ip}={mac.replace('-', ':')}"
 
 
 @router.get("/config")
@@ -47,8 +66,9 @@ def put_config(
             if not lo <= v <= hi:
                 raise ApiError(400, "BAD_VALUE", f"{k} must be between {lo} and {hi}.")
         elif k == "arp_whitelist":
-            if not isinstance(v, list) or not all(isinstance(x, str) and "=" in x for x in v):
-                raise ApiError(400, "BAD_VALUE", "arp_whitelist entries must look like ip=mac.")
+            if not isinstance(v, list):
+                raise ApiError(400, "BAD_VALUE", "arp_whitelist must be a list of ip=mac entries.")
+            v = [_arp_entry(x) for x in v]
         else:
             v = str(v)
         clean[k] = v
