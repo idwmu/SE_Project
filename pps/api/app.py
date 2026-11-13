@@ -21,6 +21,7 @@ from . import (
     routes_capture,  # PPS-F-001..003, F-030/031, F-051/052
     routes_config,  # PPS-F-060
     routes_filters,  # PPS-F-020..023
+    routes_health,  # PPS-F-062
 )
 from .deps import ApiError, auth_error_status
 
@@ -35,6 +36,7 @@ ROUTERS = [
     routes_alerts.router,
     routes_config.router,
     routes_audit.router,
+    routes_health.router,
 ]
 
 
