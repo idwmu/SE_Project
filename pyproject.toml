@@ -16,6 +16,7 @@ include = ["pps*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+filterwarnings = ["ignore::jwt.warnings.InsecureKeyLengthWarning"]
 
 [tool.ruff]
 line-length = 100
@@ -27,3 +28,19 @@ select = ["E", "F", "W", "I", "B", "UP"]
 [tool.ruff.lint.per-file-ignores]
 # FastAPI's Depends() in argument defaults is the framework's intended pattern.
 "pps/api/*" = ["B008"]
+
+[tool.importlinter]
+root_package = "pps"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Core modules do not depend on the API layer (PPS-NF-006)"
+type = "forbidden"
+source_modules = ["pps.decode", "pps.displayfilter", "pps.detectors", "pps.storage", "pps.capture", "pps.auth", "pps.bus"]
+forbidden_modules = ["pps.api", "fastapi"]
+
+[[tool.importlinter.contracts]]
+name = "Decoder and filters are independent of capture, storage and auth (PPS-NF-006)"
+type = "forbidden"
+source_modules = ["pps.decode", "pps.displayfilter", "pps.detectors"]
+forbidden_modules = ["pps.capture", "pps.storage", "pps.auth"]

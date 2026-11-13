@@ -30,6 +30,8 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Ruff
         run: ruff check . --output-format=github
+      - name: Module boundaries (import-linter, PPS-NF-006)
+        run: lint-imports
 
   test:
     name: Test (py${{ matrix.python-version }})
