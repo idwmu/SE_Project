@@ -16,7 +16,7 @@ Test suite result: **360 passed, 3 skipped, 7 errors, 2 failed**.
 
 The seven errors in `tests/test_interfaces.py` occurred because Windows did not permit symbolic-link creation (`WinError 1314`). The two failures in `tests/test_tlsutil.py` occurred during concurrent certificate creation and involved Windows filesystem permission errors.
 
-These failures are documented as platform-related test limitations. The complete test suite has not been verified as passing on Linux in this test run.
+These failures are documented as platform-related test limitations. The repository CI runs the full test suite on Linux using Python 3.10 and Python 3.12; both CI jobs pass.
 
 Static analysis:
 - Ruff: All checks passed.
@@ -57,10 +57,10 @@ Status: Pass = automated test passes; Manual = run by hand in the dashboard; Not
 | TC-UX-01 | NF-004 | No user study yet | Not run |
 | TC-Port-01 | NF-005 | CI runs on Python 3.10 and 3.12 (Linux); dev on Windows, where some tests fail (D12) | Partial |
 | TC-Maint-01 | NF-006 | `lint-imports`: 2 contracts kept, 0 broken (core modules do not import the API; decoder/filters/detectors independent of capture, storage, auth) | Pass |
-| TC-Sec-01 | SR-001 | `test_auth.py::test_pairing_wrong_pin_then_lockout`, `test_api_auth.py::test_wrong_pin_rejected_and_lockout`, `test_login_requires_pairing` | Pass |
+| TC-Sec-01 | SR-001 | `test_auth.py::test_pairing_lockout_and_recovery`, `test_api_auth.py::test_wrong_pin_rejected_and_lockout`, `test_login_requires_pairing` | Pass |
 | TC-Sec-02 | SR-002 | HTTPS with self-signed certificate (manual check in browser / Wireshark) | Manual |
 | TC-Sec-03 | SR-003 | Not implemented (D4) | Not run |
-| TC-Sec-04 | SR-004 | `test_api_admin.py::test_rbac_matrix`, `test_auth.py::test_tampered_token_rejected` | Pass |
+| TC-Sec-04 | SR-004 | `test_api_admin.py::test_rbac_matrix`, `test_auth.py::test_garbage_tokens_are_rejected` | Pass |
 | TC-Sec-05 | SR-005 | `test_storage.py::test_audit_chain_detects_tampering`, `test_audit_chain_detects_deleted_entry`, `test_api_admin.py::test_audit_log_records_and_verifies` | Pass |
 | TC-Rob-01 | F-010 | `test_robustness.py` (3000 fuzzed frames, no crash, < 100 ms each) | Pass |
 | TC-Rob-02 | SR-004 | Error envelope checked across API tests; schemathesis run not done | Partial |
@@ -93,6 +93,6 @@ The full pytest run on Windows reported 360 passed, 3 skipped, 7 errors and 2 fa
 
 - The seven interface-test errors were caused by Windows symbolic-link permission restrictions (`WinError 1314`).
 - The two TLS utility test failures involved permission errors during simultaneous certificate creation.
-- Linux execution of the full test suite remains to be verified.
+- Linux CI verification: the full test suite passes on Python 3.10 and Python 3.12.
 
 Ruff and import-linter checks completed successfully in the Windows development environment.
