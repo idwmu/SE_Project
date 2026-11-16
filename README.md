@@ -6,9 +6,11 @@ anomalies (ARP spoofing, port scans, rogue APs) and control it from a
 companion web app. See [`Pocket_Packet_Sniffer_SRS.md`](Pocket_Packet_Sniffer_SRS.md)
 for the requirements.
 
-> **Status:** early development. Only the repository scaffolding and the
-> configuration module (`pps/settings.py`) exist so far. Capture, decoding,
-> storage, alerting and the API arrive in later pull requests.
+> **Status:** all 23 planned stages are merged except the final documentation
+> (this change). See [`docs/PR_PLAN.md`](docs/PR_PLAN.md) for what was built and
+> when, [`docs/DEVIATIONS.md`](docs/DEVIATIONS.md) for every difference from the
+> SRS and plan, and [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for the demo.
+> [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md) lists test results and benchmarks.
 
 Capture only on networks you own or are explicitly authorised to monitor.
 
@@ -27,8 +29,24 @@ pip install -e .
 
 ```bash
 ruff check .
+lint-imports          # module boundaries (PPS-NF-006)
 python -m pytest -q
 ```
+
+CI runs all three on Python 3.10 and 3.12, plus a check that pull request
+descriptions match the template.
+
+## Running the demo
+
+```bash
+python tools/make_demo_pcaps.py data/replay   # demo captures
+python -m pps                                 # https://localhost:8443
+```
+
+The start-up banner prints the pairing PIN and, on the first run only, the
+admin password. Live capture needs Npcap (Windows) or `CAP_NET_RAW` (Linux);
+replay works without either. The walkthrough is in
+[`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
 
 ## Configuration
 
@@ -86,5 +104,6 @@ Tokens and lockout state are held in memory, so restarting the service signs eve
 
 ## Workflow
 
-Work lands through pull requests reviewed by the repository owner; see the
-planned PR sequence in the project guide.
+Work lands through pull requests reviewed by the repository owner. Branches are
+named `prNN-name`, and PR titles and commits carry the Jira key, for example
+`PR 19: Users and audit log [PPS-36]`.
