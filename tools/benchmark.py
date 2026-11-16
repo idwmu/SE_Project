@@ -1,4 +1,3 @@
-
 """Performance benchmark for PPS-NF-001 (live-view latency) and PPS-NF-003 (packet loss).
 
 Replays synthetic traffic at fixed packet rates through the real capture pipeline
