@@ -26,7 +26,7 @@ SRS v1.0 (08-09-2026); Test Plan v1.0 (22-10-2026); `docs/DEVIATIONS.md`; `docs/
 | Packet loss of 1% or less | PPS-NF-003 | PCAP written first; bounded queues so a slow client never blocks capture |
 | Authenticated, encrypted, role-based, audited control channel | PPS-SR-001, 002, 004, 005 | PIN pairing, HTTPS, token auth, RBAC, hash-chained audit log |
 | Local storage and standard export | PPS-F-030, F-031 | SQLite for metadata, one standard PCAP per session |
-| Runs on commodity hardware, no build step | Team constraint | Python 3.10+, one process, vanilla JavaScript front end |
+| Runs on commodity hardware, no build step | Team constraint (D1) | Python 3.10+, one process, vanilla JavaScript front end |
 
 ## 3. Architecture overview
 
@@ -133,7 +133,7 @@ Scapy to Npcap (Windows) or libpcap (Linux and macOS) for capture. On Linux `int
 | Accountability | Audit log of pairing, logins, config changes, user changes, capture start and end, and alerts; each row stores `prev_hash` and `hash` (SHA-256 chain); `GET /audit` verifies the chain, so an edited or deleted row is detected | PPS-SR-005 |
 | Capture ethics | Live capture needs an explicit "authorised to capture" confirmation (HTTP 412 `AUTHORISATION_REQUIRED` otherwise) | SRS 2.5 |
 | Input safety | Replay file names are resolved inside the replay folder; session ids are validated; filters are parsed by our own parser, never evaluated as code | General |
-| Not provided | Encryption at rest, CA-issued certificate, token refresh, configured HMAC key for the audit chain | D4, D15, D6, D11 |
+| Not provided | Encryption at rest, CA-issued certificate, token refresh, configured HMAC key for the audit chain | D6, D19, D8, D15 |
 
 First run: `bootstrap_admin()` creates the user `admin` with a random password shown once in the banner.
 
@@ -161,16 +161,20 @@ Browser  --HTTPS-->  Uvicorn / FastAPI  -->  Core (capture, bus, auth, storage)
 
 | ID | Decision as built | Original plan | Reason |
 |---|---|---|---|
-| AD-1 | Promiscuous capture plus PCAP replay | 802.11 monitor mode on a USB adapter (D1) | No monitor-mode adapter on the development laptops |
-| AD-2 | Scapy for capture and decoding, in a thread | pcapy-ng and dpkt in a separate process (D3) | One dependency for capture, decode and PCAP I/O |
-| AD-3 | scrypt (standard library) | Argon2id (D5) | Avoids a native dependency that is awkward on Windows |
-| AD-4 | 1-hour access token, no refresh | 15-minute token plus refresh token (D6) | Simpler for the demo |
-| AD-5 | One opaque client token (`x-pps-client`) | Client id and secret from `/pair` (D7) | Simpler and equivalent for one browser per pairing |
-| AD-6 | Hash-chained audit log, optional HMAC | Same, with HMAC key (D11) | Key management not configured |
-| AD-7 | Roles admin, analyst, trainee | Administrator and standard user (D10) | SRS 2.3 also defines a trainee |
-| AD-8 | Self-signed certificate, renewed before expiry | CA-issued certificate (D15) | No public hostname |
+| AD-1 | Laptop-class host (Windows or Linux) | Raspberry Pi Zero 2 W handheld (D1) | Hardware not available |
+| AD-2 | Promiscuous capture plus PCAP replay | 802.11 monitor mode on a USB adapter (D2) | No monitor-mode adapter on the development laptops |
+| AD-3 | Scapy for capture and decoding, in a thread | pcapy-ng and dpkt in a separate process (D5) | One dependency for capture, decode and PCAP I/O |
+| AD-4 | Web dashboard, PIN pairing over HTTPS | Flutter app, BLE pairing, certificate pinning (D4) | Team skills and time; works on any browser |
+| AD-5 | scrypt (standard library) | Argon2id (D7) | Avoids a native dependency that is awkward on Windows |
+| AD-6 | 1-hour access token, no refresh | 15-minute token plus refresh token (D8) | Simpler for the demo |
+| AD-7 | One opaque client token (`x-pps-client`) | Client id and secret from `/pair` (D9) | Simpler and equivalent for one browser per pairing |
+| AD-8 | Hash-chained audit log, optional HMAC | Same, with HMAC key (D15) | Key management not configured |
+| AD-9 | Health from OS battery, storage, uptime, CPU, memory | Fuel gauge and temperature (D12) | No device hardware |
+| AD-10 | Alerts over WebSocket, browser notification | Background push to a phone (D13) | Follows from AD-4 |
+| AD-11 | Roles admin, analyst, trainee | Administrator and standard user (D14) | SRS 2.3 also defines a trainee |
+| AD-12 | Self-signed certificate, renewed before expiry | CA-issued certificate (D19) | No public hostname |
 
-Not implemented: archival of old sessions (D9, F-033), rogue access point detection (D2, F-042), encryption at rest (D4, SR-003).
+Not implemented: archival of old sessions (D11, F-033), rogue access point detection (D3, F-042), encryption at rest (D6, SR-003).
 
 ## 11. Traceability to the SRS
 
@@ -194,5 +198,5 @@ Not implemented: archival of old sessions (D9, F-033), rogue access point detect
 
 - Live capture needs Npcap or libpcap and, on most systems, administrator rights.
 - Performance figures come from replayed traffic on one machine, not a radio link.
-- Windows runs of the test suite show 7 symlink errors and 2 certificate-creation race failures (D12); Linux CI passes.
+- Windows runs of the test suite show 7 symlink errors and 2 certificate-creation race failures (D16); Linux CI passes.
 - One capture session at a time.
